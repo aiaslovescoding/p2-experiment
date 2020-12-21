@@ -1,23 +1,19 @@
 import './App.css';
 
 import { useEffect } from 'react';
-import { World, Body, Circle, Plane, RevoluteConstraint } from 'p2';
+import { Engine, Render, Bodies, World, MouseConstraint, Mouse, Constraint, Composites, Body, Composite, Runner, Events } from 'matter-js';
 
 
 function App() {
-  let ctx, canvas, world, mouseBody, mouseConstraint;
-
-  const scaleX = 50, scaleY = -50;
 
   useEffect(() => {
     init();
-    animate();
   });
 
   return (
     <div className="App">
       <header className="App-header">
-        <canvas width="1500" height="1000" id="myCanvas"></canvas>
+        <div id="physics"></div>
         <p>
           Evolution
         </p>
@@ -29,186 +25,125 @@ function App() {
 
   function init() {
 
-    // Init canvas
-    canvas = document.getElementById("myCanvas");
-    ctx = canvas.getContext("2d");
-    ctx.lineWidth = 0.05;
-    createWorld();
-    addMouseDownListener();
-    addMouseMoveListener();
-    addMouseUpListener();
-  }
+    var group = Body.nextGroup(true);
 
-  // This is a simple example of building and running a simulation
-  // using Box2D. Here we create a large ground box and a small dynamic
-  // box.
-  // There are no graphics for this example. Box2D is meant to be used
-  // with your rendering engine in your game engine.
+    // create an engine
+    var engine = Engine.create();
 
-  function createWorld() {
-    // Init js
-    world = new World();
-
-    world.addBody(createCircle(0.5, [2, 2], [0, 0]));
-    world.addBody(createCircle(0.5, [-1, 2], [0, 0]));
-
-    world.addBody(createCircle(1, [0, 4], [0, 0]));
-    world.addBody(createCircle(0.5, [2, 4], [0, 0]));
-    world.addBody(createCircle(1, [5, 6], [0, 0]));
-
-    const rightElbowJoint = new RevoluteConstraint(world.bodies[0], world.bodies[1], {
-      localPivotA: [0, 0],
-      localPivotB: [2, 0],
-    });
-
-
-    const rightElbowJoint2 = new RevoluteConstraint(world.bodies[1], world.bodies[2], {
-      localPivotA: [0, 0],
-      localPivotB: [2, 0],
-    });
-
-    const rightElbowJoint3 = new RevoluteConstraint(world.bodies[2], world.bodies[3], {
-      localPivotA: [0, 0],
-      localPivotB: [2, 0],
-    });
-
-    const rightElbowJoint4 = new RevoluteConstraint(world.bodies[3], world.bodies[0], {
-      localPivotA: [0, 0],
-      localPivotB: [2, 0],
-    });
-
-    world.addConstraint(rightElbowJoint);
-    world.addConstraint(rightElbowJoint2);
-    world.addConstraint(rightElbowJoint3);
-    world.addConstraint(rightElbowJoint4);
-
-    mouseBody = new Body();
-    world.addBody(mouseBody);
-
-    // Add a plane
-    var planeShape = new Plane();
-    var planeBody = new Body();
-    planeBody.addShape(planeShape);
-    world.addBody(planeBody);
-    
-  }
-
-  function createCircle(radius, position, velocity) {
-    const circleShape = new Circle({ radius });
-    const circleBody = new Body({ mass: 1, position, velocity });
-    circleBody.addShape(circleShape);
-    return circleBody;
-  }
-
-  function addMouseDownListener() {
-    canvas.addEventListener('mousedown', function (event) {
-
-      // Convert the canvas coordinate to physics coordinates
-      var position = getPhysicsCoord(event);
-
-      // Check if the cursor is inside the box
-      var hitBodies = world.hitTest(position, world.bodies);
-
-      if (hitBodies.length) {
-
-        // Move the mouse body to the cursor position
-        mouseBody.position[0] = position[0];
-        mouseBody.position[1] = position[1];
-
-        // Create a RevoluteConstraint.
-        // This constraint lets the bodies rotate around a common point
-        mouseConstraint = new RevoluteConstraint(mouseBody, hitBodies[0], {
-          worldPivot: position,
-          collideConnected: false
-        });
-        world.addConstraint(mouseConstraint);
+    // create a renderer
+    var render = Render.create({
+      element: document.getElementById("physics"),
+      engine: engine,
+      options: {
+        showAngleIndicator: true,
+        showCollisions: true
       }
     });
-  }
 
-  function addMouseMoveListener() {
-    // Sync the mouse body to be at the cursor position
-    canvas.addEventListener('mousemove', function (event) {
-      var position = getPhysicsCoord(event);
-      mouseBody.position[0] = position[0];
-      mouseBody.position[1] = position[1];
-    });
-  }
+    // create two boxes and a ground
+    var boxA = Bodies.rectangle(200, 200, 400, 80);
+    var boxB = Bodies.rectangle(450, 50, 80, 80);
+    var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
 
-  function addMouseUpListener() {
-    // Remove the mouse constraint on mouse up
-    canvas.addEventListener('mouseup', function (event) {
-      world.removeConstraint(mouseConstraint);
-      mouseConstraint = null;
-    });
-  }
+    var car = Composite.create({ label: 'Car' });
 
-
-  // Convert a canvas coordiante to physics coordinate
-  function getPhysicsCoord(mouseEvent) {
-    var rect = canvas.getBoundingClientRect();
-    var x = mouseEvent.clientX - rect.left;
-    var y = mouseEvent.clientY - rect.top;
-
-    x = (x - canvas.width / 2) / scaleX;
-    y = (y - canvas.height / 2) / scaleY;
-
-    return [x, y];
-  }
-
-  function renderPlane(position) {
-    ctx.strokeStyle = "#00FF00";
-    ctx.beginPath();
-    ctx.moveTo(-canvas.width, position[1]);
-    ctx.lineTo(canvas.width, position[1]);
-    ctx.stroke();
-  }
-
-  function renderCircle(position, radius) {
-    ctx.strokeStyle = "#FF0000";
-    ctx.beginPath();
-    ctx.arc(position[0], position[1], radius, 0, 2 * Math.PI);
-    ctx.stroke();
-  }
-
-  function renderBody(body) {
-    body.shapes.forEach(shape => {
-      if (shape.type === 1) {
-        renderCircle(body.position, shape.radius);
-      }
-
-      if (body.type === 2) {
-        renderPlane(body.position);
+    const carBody = Bodies.rectangle(200, 60, 200, 50, {
+      collisionFilter: {
+        group: group
       }
     })
-  }
 
-  function render() {
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const frontWheel = Bodies.circle(100, 60, 50, {
+      collisionFilter: {
+        group: group
+      },
+      friction: 0.8,
 
-    // Transform the canvas
-    // Note that we need to flip the y axis since Canvas pixel coordinates
-    // goes from top to bottom, while physics does the opposite.
-    ctx.save();
-    ctx.translate(canvas.width / 2, canvas.height / 2);  // Translate to the center
-    ctx.scale(scaleX, scaleY);       // Zoom in and flip y axis
+    });
+    const backWheel = Bodies.circle(300, 60, 50, {
+      collisionFilter: {
+        group: group
+      },
+      friction: 0.8
+    });
 
-    world.bodies.forEach(renderBody);
 
-    // Restore transform
-    ctx.restore();
-  }
 
-  // Animation loop
-  function animate() {
-    requestAnimationFrame(animate);
+    var frontAxle = Constraint.create({
+      bodyB: carBody,
+      pointB: { x: 100, y: 0 },
+      bodyA: frontWheel,
+      stiffness: 1,
+      length: 0
+    });
 
-    // Move physics bodies forward in time
-    world.step(1 / 60);
+    var backAxle = Constraint.create({
+      bodyB: carBody,
+      pointB: { x: -100, y: 0 },
+      bodyA: backWheel,
+      stiffness: 1,
+      length: 0
+    });
 
-    // Render scene
-    render();
+
+
+
+
+    Composite.add(car, carBody)
+    Composite.add(car, frontWheel)
+    Composite.add(car, backWheel)
+
+    Composite.addConstraint(car, frontAxle);
+    Composite.addConstraint(car, backAxle);
+
+
+    const mouse = Mouse.create(document.getElementById("physics"))
+
+    var myConstraint = Constraint.create({
+      label: 'Mouse Constraint',
+      pointA: mouse.position,
+      pointB: { x: 0, y: 0 },
+      length: 0.01,
+      stiffness: 1,
+      angularStiffness: 0,
+      render: {
+        strokeStyle: '#90EE90',
+        lineWidth: 3
+      }
+    });
+
+    const mouseConstraint = MouseConstraint.create(engine, { mouse, constraint: myConstraint })
+
+    // add all of the bodies to the world
+    World.add(engine.world, [
+      boxA,
+      //boxB, 
+      ground]);
+    World.add(engine.world, [
+      mouseConstraint,
+      //  frontAxle, 
+      //  backAxle
+    ]);
+
+    //   World.add(engine.world, Composites.car(150, 100, 150 , 30 , 30 ));
+
+    //   const constraint = Constraint.create({ bodyA: boxA, bodyB: boxB })
+    //   World.add(engine.world, constraint);
+    World.add(engine.world, car);
+
+
+
+    // run the engine
+    const runner = Engine.run(engine);
+
+    Events.on(runner, "beforeTick", function () {
+      Body.setAngularVelocity(backWheel, 0.1);
+      Body.setAngularVelocity(frontWheel, 0.1);
+    })
+
+    //  Runner.stop(runner);
+    // run the renderer
+    Render.run(render);
   }
 }
 
