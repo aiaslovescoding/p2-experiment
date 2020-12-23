@@ -1,10 +1,14 @@
 import './App.css';
 
 import { useEffect } from 'react';
-import { Engine, Render, Bodies, World, MouseConstraint, Mouse, Constraint, Composites, Body, Composite, Runner, Events } from 'matter-js';
+import { Engine, Render, Bodies, World, MouseConstraint, Mouse, Constraint, Body, Composite, Runner, Events, Composites } from 'matter-js';
 
 
 function App() {
+  let mouse;
+  let command;
+  let engine;
+  let mouseStart;
 
   useEffect(() => {
     init();
@@ -13,7 +17,16 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <div id="physics"></div>
+        <div id="physics" onMouseDown={_onMouseDown} onMouseUp={_onMouseUp}></div>
+        <button onClick={makeRectangles}>
+          Make Rectangles
+        </button>
+        <button onClick={makeCircles}>
+          Make Circles
+        </button>
+        <button onClick={doNothing}>
+          Do Nothing
+        </button>
         <p>
           Evolution
         </p>
@@ -22,13 +35,51 @@ function App() {
     </div>
   );
 
+  function _onMouseDown() {
+    mouseStart = {...mouse.position};
+
+    
+
+  }
+
+  function _onMouseUp() {
+    const mouseFinish = mouse.position;
+    console.log(mouseStart,mouseFinish);
+    
+    if (command === "makeRectangle") {
+      const mouseXMiddle = (mouseStart.x + mouseFinish.x) / 2;
+      const mouseYMiddle = (mouseStart.y + mouseFinish.y) / 2;
+      const width = Math.abs(mouseStart.x - mouseFinish.x)
+      const height = Math.abs(mouseStart.y - mouseFinish.y)
+      var rect = Bodies.rectangle(mouseXMiddle,mouseYMiddle , width, height, { isStatic: true });
+      World.add(engine.world, rect);
+    }
+    if (command === "makeCircle") {
+      const radius = ((mouseStart.y - mouseFinish.y) ^ 2 + (mouseStart.x - mouseFinish.x) ^ 2) ^ 0.5
+      var rect = Bodies.circle(mouse.position.x, mouse.position.y, radius);
+      World.add(engine.world, rect);
+    }
+
+  }
+
+  function makeRectangles() {
+    command = "makeRectangle";
+  }
+
+  function makeCircles() {
+    command = "makeCircle";
+  }
+  function doNothing() {
+    command = "doNothing";
+  }
 
   function init() {
-
+    Array.from(document.getElementById("physics").children).forEach(child => child.remove())
+    mouse = Mouse.create(document.getElementById("physics"));
     var group = Body.nextGroup(true);
 
     // create an engine
-    var engine = Engine.create();
+    engine = Engine.create();
 
     // create a renderer
     var render = Render.create({
@@ -36,31 +87,39 @@ function App() {
       engine: engine,
       options: {
         showAngleIndicator: true,
-        showCollisions: true
+        showCollisions: true,
+        width: 2200,
+        showDebug: true,
+        showPositions: true,
+        showIds: true,
+        showShadows: true,
+        showVertexNumbers: false,
+        showVelocity: true,
+        showCollisions: true,
+        showSeparations: true,
+        showShadows: true,
       }
     });
 
     // create two boxes and a ground
-    var boxA = Bodies.rectangle(200, 200, 400, 80);
-    var boxB = Bodies.rectangle(450, 50, 80, 80);
-    var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
+    var ground = Bodies.rectangle(400, 610, 30000, 60, { isStatic: true });
 
     var car = Composite.create({ label: 'Car' });
 
-    const carBody = Bodies.rectangle(200, 60, 200, 50, {
+    const carBody = Bodies.rectangle(200, 60, 200, 20, {
       collisionFilter: {
         group: group
       }
     })
 
-    const frontWheel = Bodies.circle(100, 60, 50, {
+    const frontWheel = Bodies.circle(100, 60, 70, {
       collisionFilter: {
         group: group
       },
       friction: 0.8,
 
     });
-    const backWheel = Bodies.circle(300, 60, 50, {
+    const backWheel = Bodies.circle(300, 60, 70, {
       collisionFilter: {
         group: group
       },
@@ -97,8 +156,6 @@ function App() {
     Composite.addConstraint(car, backAxle);
 
 
-    const mouse = Mouse.create(document.getElementById("physics"))
-
     var myConstraint = Constraint.create({
       label: 'Mouse Constraint',
       pointA: mouse.position,
@@ -116,9 +173,10 @@ function App() {
 
     // add all of the bodies to the world
     World.add(engine.world, [
-      boxA,
+      //     boxA,
       //boxB, 
       ground]);
+
     World.add(engine.world, [
       mouseConstraint,
       //  frontAxle, 
@@ -131,14 +189,23 @@ function App() {
     //   World.add(engine.world, constraint);
     World.add(engine.world, car);
 
+    var pyramid2 = Composites.pyramid(1300, 0, 15, 30, 0, 0, function (x, y) {
+      return Bodies.rectangle(x, y, 20, 30);
+    });
 
+    //var pyramid3 = Composites.pyramid(800, 0, 12, 12, 0, 0, function (x, y) {
+    //return Bodies.circle(x, y, 8);
+    //});
+
+    World.add(engine.world, pyramid2);
+    //World.add(engine.world, pyramid3);
 
     // run the engine
     const runner = Engine.run(engine);
 
     Events.on(runner, "beforeTick", function () {
-      Body.setAngularVelocity(backWheel, 0.1);
-      Body.setAngularVelocity(frontWheel, 0.1);
+      Body.setAngularVelocity(backWheel, .5);
+      Body.setAngularVelocity(frontWheel, .5);
     })
 
     //  Runner.stop(runner);
