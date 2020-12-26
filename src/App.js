@@ -27,6 +27,9 @@ function App() {
         <button onClick={doNothing}>
           Do Nothing
         </button>
+        <button onClick={buildPyramid}>
+          build Pyramid
+        </button>
         <p>
           Evolution
         </p>
@@ -53,8 +56,16 @@ function App() {
     }
     if (command === "makeCircle") {
       const radius = ((mouseStart.y - mouseFinish.y) ^ 2 + (mouseStart.x - mouseFinish.x) ^ 2) ^ 0.5
-      const circle = Bodies.circle(mouse.position.x, mouse.position.y, radius);
+      const circle = Bodies.circle(mouseStart.x, mouseStart.y, radius);
       World.add(engine.world, circle);
+    }
+    if (command === "buildPyramid") {
+      const shapeSize = 30
+      const pyraWidth = Math.round(Math.abs(mouseStart.x - mouseFinish.x) / shapeSize)
+      const pyramid4 = Composites.pyramid(mouseStart.x, mouseStart.y, pyraWidth, 30, 0, 0, function (x, y) {
+        return Bodies.rectangle(x, y, shapeSize, shapeSize);
+      });
+      World.add(engine.world, pyramid4);
     }
 
   }
@@ -68,6 +79,9 @@ function App() {
   }
   function doNothing() {
     command = "doNothing";
+  }
+  function buildPyramid() {
+    command = "buildPyramid";
   }
 
   function init() {
