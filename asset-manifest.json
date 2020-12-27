@@ -1,22 +1,22 @@
 {
   "files": {
     "main.css": "/p2-experiment/static/css/main.ab7136cd.chunk.css",
-    "main.js": "/p2-experiment/static/js/main.479fbe62.chunk.js",
-    "main.js.map": "/p2-experiment/static/js/main.479fbe62.chunk.js.map",
+    "main.js": "/p2-experiment/static/js/main.2f5678a1.chunk.js",
+    "main.js.map": "/p2-experiment/static/js/main.2f5678a1.chunk.js.map",
     "runtime-main.js": "/p2-experiment/static/js/runtime-main.79e4952c.js",
     "runtime-main.js.map": "/p2-experiment/static/js/runtime-main.79e4952c.js.map",
-    "static/js/2.c7440a26.chunk.js": "/p2-experiment/static/js/2.c7440a26.chunk.js",
-    "static/js/2.c7440a26.chunk.js.map": "/p2-experiment/static/js/2.c7440a26.chunk.js.map",
+    "static/js/2.2b10f158.chunk.js": "/p2-experiment/static/js/2.2b10f158.chunk.js",
+    "static/js/2.2b10f158.chunk.js.map": "/p2-experiment/static/js/2.2b10f158.chunk.js.map",
     "static/js/3.f5d701ad.chunk.js": "/p2-experiment/static/js/3.f5d701ad.chunk.js",
     "static/js/3.f5d701ad.chunk.js.map": "/p2-experiment/static/js/3.f5d701ad.chunk.js.map",
     "index.html": "/p2-experiment/index.html",
     "static/css/main.ab7136cd.chunk.css.map": "/p2-experiment/static/css/main.ab7136cd.chunk.css.map",
-    "static/js/2.c7440a26.chunk.js.LICENSE.txt": "/p2-experiment/static/js/2.c7440a26.chunk.js.LICENSE.txt"
+    "static/js/2.2b10f158.chunk.js.LICENSE.txt": "/p2-experiment/static/js/2.2b10f158.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.79e4952c.js",
-    "static/js/2.c7440a26.chunk.js",
+    "static/js/2.2b10f158.chunk.js",
     "static/css/main.ab7136cd.chunk.css",
-    "static/js/main.479fbe62.chunk.js"
+    "static/js/main.2f5678a1.chunk.js"
   ]
 }
