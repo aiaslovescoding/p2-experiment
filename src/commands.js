@@ -1,4 +1,4 @@
-import { Bodies, World, Composites } from 'matter-js';
+import { Bodies, World, Composites, Events, Body } from 'matter-js';
 import createCar from './createCar.js';
 
 function mouseXDistance(mouseStart, mouseFinish) {
@@ -54,7 +54,13 @@ const commands = [
             const carCenter = mouseStart;
             const wheelBase = mouseXDistance(mouseStart, mouseFinish) * 2
             const wheelRadius = mouseYDistance(mouseStart, mouseFinish);
-            const { car } = createCar(carCenter, wheelBase, wheelRadius)
+            const { car, backWheel, frontWheel } = createCar(carCenter, wheelBase, wheelRadius)
+
+            Events.on(engine, "beforeUpdate", function () {
+                Body.setAngularVelocity(backWheel, .5);
+                Body.setAngularVelocity(frontWheel, .5);
+              })
+
             World.add(engine.world, car);
         }
     },

@@ -1,8 +1,7 @@
 import './App.css';
 
 import { useEffect, useState } from 'react';
-import { Common, Engine, Render, Bodies, World, MouseConstraint, Mouse, Constraint, Body, Events, Composites } from 'matter-js';
-import createCar from './createCar.js'
+import { Engine, Render, Bodies, World, MouseConstraint, Mouse, Constraint } from 'matter-js';
 import { doCommand, defaultCommand } from './commands'
 import Controls from './Controls.jsx'
 
@@ -43,12 +42,9 @@ function App() {
     const initMouse = Mouse.create(mainElement);
     setMouse(initMouse);
 
-    const { car, frontWheel, backWheel } = createCar({x: 100, y: 0}, 200, 50);
-
-    // create an engine
     const initEngine = Engine.create();
 
-    // create a renderer
+
     const render = Render.create({
       element: mainElement,
       engine: initEngine,
@@ -83,25 +79,10 @@ function App() {
 
     const mouseConstraint = MouseConstraint.create(initEngine, { mouse: initMouse, constraint: myConstraint })
 
-
     World.add(initEngine.world, [
       ground, 
-      mouseConstraint, 
-      car
+      mouseConstraint
     ]);
-
-    const pyramid2 = Composites.pyramid(1300, 0, 15, 30, 0, 0, function (x, y) {
-      return Bodies.rectangle(x, y, 20, 30);
-    });
-
-    World.add(initEngine.world, pyramid2);
-
-    
-
-    Events.on(initEngine, "beforeUpdate", function () {
-      Body.setAngularVelocity(backWheel, .5);
-      Body.setAngularVelocity(frontWheel, .5);
-    })
 
     Engine.run(initEngine);
     Render.run(render);
