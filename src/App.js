@@ -1,7 +1,7 @@
 import './App.css';
 
 import { useEffect, useState } from 'react';
-import { Engine, Render, Bodies, World, MouseConstraint, Mouse, Constraint, Body, Events, Composites } from 'matter-js';
+import { Common, Engine, Render, Bodies, World, MouseConstraint, Mouse, Constraint, Body, Events, Composites } from 'matter-js';
 import createCar from './createCar.js'
 import { doCommand, defaultCommand } from './commands'
 import Controls from './Controls.jsx'
@@ -37,18 +37,20 @@ function App() {
   }
 
   function init() {
-    Array.from(document.getElementById("physics").children).forEach(child => child.remove())
-    const initMouse = Mouse.create(document.getElementById("physics"));
+    const mainElement = document.getElementById("physics");
+
+    Array.from(mainElement.children).forEach(child => child.remove())
+    const initMouse = Mouse.create(mainElement);
     setMouse(initMouse);
 
-    const { car, frontWheel, backWheel } = createCar();
+    const { car, frontWheel, backWheel } = createCar({x: 100, y: 0}, 200, 50);
 
     // create an engine
     const initEngine = Engine.create();
 
     // create a renderer
     const render = Render.create({
-      element: document.getElementById("physics"),
+      element: mainElement,
       engine: initEngine,
       options: {
         showAngleIndicator: true,
@@ -83,7 +85,10 @@ function App() {
 
 
     World.add(initEngine.world, [
-      ground, mouseConstraint, car]);
+      ground, 
+      mouseConstraint, 
+      car
+    ]);
 
     const pyramid2 = Composites.pyramid(1300, 0, 15, 30, 0, 0, function (x, y) {
       return Bodies.rectangle(x, y, 20, 30);
@@ -91,14 +96,14 @@ function App() {
 
     World.add(initEngine.world, pyramid2);
 
-    const runner = Engine.run(initEngine);
+    
 
-    Events.on(runner, "beforeTick", function () {
+    Events.on(initEngine, "beforeUpdate", function () {
       Body.setAngularVelocity(backWheel, .5);
       Body.setAngularVelocity(frontWheel, .5);
     })
 
-
+    Engine.run(initEngine);
     Render.run(render);
     setEngine(initEngine);
   }

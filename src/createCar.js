@@ -1,23 +1,29 @@
 import { Bodies, Constraint, Composite, Body} from 'matter-js';
 
-function createCar() {
+function createCar(carCenter, wheelBase, wheelRadius) {
+
+    const halfWheelBase = wheelBase/2
+    const frontWheelX = carCenter.x + halfWheelBase
+    const backWheelX = carCenter.x - halfWheelBase
+
     const car = Composite.create({ label: 'Car' });
     const group = Body.nextGroup(true);
 
-    const carBody = Bodies.rectangle(200, 60, 200, 20, {
+    const carBody = Bodies.rectangle(carCenter.x, carCenter.y, wheelBase, 20, {
         collisionFilter: {
             group: group
         }
     })
 
-    const frontWheel = Bodies.circle(100, 60, 70, {
+    
+    const frontWheel = Bodies.circle(frontWheelX, carCenter.y, wheelRadius, {
         collisionFilter: {
             group: group
         },
         friction: 0.8,
 
     });
-    const backWheel = Bodies.circle(300, 60, 70, {
+    const backWheel = Bodies.circle(backWheelX, carCenter.y, wheelRadius, {
         collisionFilter: {
             group: group
         },
@@ -26,7 +32,7 @@ function createCar() {
 
     const frontAxle = Constraint.create({
         bodyB: carBody,
-        pointB: { x: 100, y: 0 },
+        pointB: { x:  halfWheelBase, y: 0 },
         bodyA: frontWheel,
         stiffness: 1,
         length: 0
@@ -34,7 +40,7 @@ function createCar() {
 
     const backAxle = Constraint.create({
         bodyB: carBody,
-        pointB: { x: -100, y: 0 },
+        pointB: { x: - halfWheelBase, y: 0 },
         bodyA: backWheel,
         stiffness: 1,
         length: 0

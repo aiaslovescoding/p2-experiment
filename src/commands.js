@@ -51,7 +51,10 @@ const commands = [
         label: 'Make Car',
         name: 'makeCar',
         doCommand: function (engine, mouseStart, mouseFinish) {
-            const { car } = createCar();
+            const carCenter = mouseStart;
+            const wheelBase = mouseXDistance(mouseStart, mouseFinish) * 2
+            const wheelRadius = mouseYDistance(mouseStart, mouseFinish);
+            const { car } = createCar(carCenter, wheelBase, wheelRadius)
             World.add(engine.world, car);
         }
     },
