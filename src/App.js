@@ -1,93 +1,22 @@
 import './App.css';
 
-import { useEffect, useState } from 'react';
-import { Engine, Render, Bodies, World, MouseConstraint, Mouse, Constraint } from 'matter-js';
-import { doCommand, defaultCommand } from './commands'
+import { useState } from 'react';
+import { Engine } from 'matter-js';
+import { defaultCommand } from './commands'
 import Controls from './Controls.jsx'
+import Physics from './Physics.jsx';
 
 function App() {
 
   const [command, setCommand] = useState(defaultCommand.name);
-  const [mouse, setMouse] = useState(null);
-  const [engine, setEngine] = useState(null);
-  const [mouseStart, setMouseStart] = useState(null);
-
-  useEffect(() => {
-    init();
-  }, []);
+  const [engine] = useState(Engine.create());
 
   return (
     <div className="App">
-        <div id="physics" onMouseDown={_onMouseDown} onMouseUp={_onMouseUp}></div>
+        <Physics engine={engine} command={command}/>
         <Controls setCommand={setCommand} command={command}></Controls>
-        <div>
-          {mouseStart && `${mouseStart.x}, ${mouseStart.y}`}
-        </div>
     </div>
   );
-
-  function _onMouseDown() {
-    setMouseStart({...mouse.position});
-  }
-
-  function _onMouseUp() {
-    const mouseFinish = mouse.position;
-    doCommand(command, engine, mouseStart, mouseFinish);
-  }
-
-  function init() {
-    const mainElement = document.getElementById("physics");
-
-    Array.from(mainElement.children).forEach(child => child.remove())
-    const initMouse = Mouse.create(mainElement);
-    setMouse(initMouse);
-
-    const initEngine = Engine.create();
-
-
-    const render = Render.create({
-      element: mainElement,
-      engine: initEngine,
-      options: {
-        showAngleIndicator: true,
-        showCollisions: true,
-        width: 2200,
-        showDebug: true,
-        showPositions: true,
-        showIds: true,
-        showShadows: true,
-        showVertexNumbers: false,
-        showVelocity: true,
-        showSeparations: true,
-      }
-    });
-
-    const ground = Bodies.rectangle(400, 610, 30000, 60, { isStatic: true });
-
-    const myConstraint = Constraint.create({
-      label: 'Mouse Constraint',
-      pointA: initMouse.position,
-      pointB: { x: 0, y: 0 },
-      length: 0.01,
-      stiffness: 1,
-      angularStiffness: 0,
-      render: {
-        strokeStyle: '#90EE90',
-        lineWidth: 3
-      }
-    });
-
-    const mouseConstraint = MouseConstraint.create(initEngine, { mouse: initMouse, constraint: myConstraint })
-
-    World.add(initEngine.world, [
-      ground, 
-      mouseConstraint
-    ]);
-
-    Engine.run(initEngine);
-    Render.run(render);
-    setEngine(initEngine);
-  }
 }
 
 export default App;
