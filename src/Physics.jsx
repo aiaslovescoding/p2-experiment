@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Engine, Render, Bodies, World, MouseConstraint, Mouse, Constraint } from 'matter-js';
 import { doCommand } from './commands'
+import { mouseDown, mouseUp } from './events.js';
 
 function Physics(props) {
     const [mouseStart, setMouseStart] = useState(null);
@@ -11,10 +12,12 @@ function Physics(props) {
     return <div id="physics" onMouseDown={_onMouseDown} onMouseUp={_onMouseUp}></div>
 
     function _onMouseDown() {
+        mouseDown.next({ ...mouse.position });
         setMouseStart({ ...mouse.position });
     }
 
     function _onMouseUp() {
+        mouseUp.next({ ...mouse.position });
         const mouseFinish = mouse.position;
         doCommand(props.command, props.engine, mouseStart, mouseFinish);
     }

@@ -1,18 +1,23 @@
-import commands, {getCommand} from './commands.js'
+import commands from './commands.js'
+import {switchCommand} from './events.js'
+import Command from "./Command.jsx"
 
-function Controls(props) {
 
-    function doCommand(name) {
-        props.setCommand(name);
-    }
+import { useState, useEffect } from 'react';
+
+
+function Controls() {
+
+    const [commandLabel, setCommandLabel] = useState();
+
+    useEffect(() => switchCommand.subscribe(data => {setCommandLabel(data.label)}), []);
 
     return (
         <div>
             {commands.map(command =>
-                <button key={command.name} onClick={() => doCommand(command.name)} >
-                    {command.label}
-                </button>)}
-            <div> Command: {getCommand(props.command).label}</div>
+                <Command command={command} >
+                </Command>)}
+            <div> Command: {commandLabel}</div>
         </div>
         )
 }

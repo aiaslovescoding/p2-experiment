@@ -1,5 +1,6 @@
 import { Bodies, World, Composites, Events, Body } from 'matter-js';
 import createCar from './createCar.js';
+import {mouseDown, mouseUp} from "./events.js";
 
 function mouseXDistance(mouseStart, mouseFinish) {
     return Math.abs(mouseStart.x - mouseFinish.x);
@@ -18,6 +19,8 @@ const commands = [
         label: 'Make Rectangle',
         name: 'makeRectangle',
         doCommand: function (engine, mouseStart, mouseFinish) {
+            
+
             const mouseXMiddle = (mouseStart.x + mouseFinish.x) / 2;
             const mouseYMiddle = (mouseStart.y + mouseFinish.y) / 2;
             const width = mouseXDistance(mouseStart, mouseFinish)
